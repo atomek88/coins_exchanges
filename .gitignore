@@ -1,0 +1,5 @@
+# node .js files
+*.log
+node_modules
+build
+args.env

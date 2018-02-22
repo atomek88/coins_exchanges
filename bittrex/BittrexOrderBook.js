@@ -1,26 +1,15 @@
-require('dotenv').config();
+
 //import { GDAXFeed } from "gdax-trading-toolkit/build/src/exchanges";
 //import { LiveBookConfig, LiveOrderbook, SkippedMessageEvent, TradeMessage } from "gdax-trading-toolkit/build/src/core";
 //import { Ticker } from "gdax-trading-toolkit/build/src/exchanges/PublicExchangeAPI";
 //import { CumulativePriceLevel } from "gdax-trading-toolkit/build/src/lib";
-/* dont need imports from above - Gdax OrderFeed  - Tomasz Michalik
-use GTT.xyz.Obj to get objects needed for creating gdax client */
 const GTT = require('gdax-trading-toolkit');
 
-const products = ['LTC-USD', 'BTC-USD', 'ETH-BTC', 'ETH-USD', 'LTC-USD'];
+let tradeVolume = 0;
+// modify the products based on what is expected
+const products = ['ETH-LTC', 'BTC-USDT', 'BTC-ETH', 'BTC-XRP'];
 const logger = GTT.utils.ConsoleLoggerFactory({ level: 'debug' });
-//const subFeeds = GTT.factories.getSubscribedFeeds
-// authorization for gdax with env variables
-const auth = {
-  key: process.env.GDAX_API_KEY,
-  secret: process.env.GDAX_API_SECRET,
-  passphrase: process.env.GDAX_PASSPHRASE,
-};
-// FUTURE : try to integrate all connections into 1 singleton object
-const exchangesCollection = () => {
-  this.totalConnections = 0;
-  this.exchList = {};
-}
+
 //const printOrderbook = GTT.util.printOrderbook;
 //const printTicker = GTT.utils.printTicker;
 // tally test
@@ -30,8 +19,8 @@ products.forEach((product) => {
 });
 let count = 0;
 // Gdax factory Tomasz Michalik
-// test creating orderbook, called getSubscribedFeeds under the hood?
-GTT.Factories.GDAX.FeedFactory(logger, products, auth).then((feed) => {
+// test creating orderbook
+GTT.Factories.Bittrex.FeedFactory(logger, products).then((feed) => {
   feed.on('data', (msg) => {
     count++;
     if (!msg.productId) {
@@ -54,36 +43,7 @@ GTT.Factories.GDAX.FeedFactory(logger, products, auth).then((feed) => {
   logger.log('error', err.message);
   process.exit(1);
 });
-
-// create subscribed feeds only?
-
-// create future placeorder message object  (PlaceOrderMessage)
-const placeOrder = {
-    time: new Date(),
-    type: 'placeOrder',
-    productId: 'BTC-USD', // change
-    clientId: null,
-    price: '10',
-    size: '1',
-    side: 'buy',
-    orderType: 'limit',
-    postOnly: true
-};
-/* function to place order on gdax with format above, error called
-GTT.DefaultAPI().placeOrder(placeOrder).then((o) => {
-    console.log(`Order ${o.id} successfully placed`);
-    return gdax.loadOrder(o.id);
-}).then((o) => {
-    console.log(`Order status: ${o.status}, ${o.time}`);
-    return gdax.cancelOrder(o.id);
-}).then((id) => {
-    console.log(`Order ${id} has been cancelled`);
-}).catch(logError);
-// log error if no order placed
-function logError(err) {
-    console.log(err.message, err.response ? `${err.response.status}: ${err.response.body.message}` : '');
-}
-   //config live book object
+  /* config live book object
   const config : LiveBookConfig = {
     product: product,
     logger: logger
